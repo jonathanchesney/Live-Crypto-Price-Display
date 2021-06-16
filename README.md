@@ -6,15 +6,15 @@ This project was inspired by the recent price surge of various cryptocurrencies.
 
 ## Methodologies
 ### Components Used
-• CC3200 Launchpad
-• Adafruit 128x128 OLED Display (SSD1351)
-• Amazon Web Services
-o   IoT Core
-o   Lambda
-o   Simple Notification Service
-• Crypto Compare Min API (www.cryptocompare.com)
-• MikroElektronika GLCD Font Creator
-• REST API
+* CC3200 Launchpad
+* Adafruit 128x128 OLED Display (SSD1351)
+* Amazon Web Services
+  * IoT Core
+  * Lambda
+  * Simple Notification Service
+* Crypto Compare Min API (www.cryptocompare.com)
+* MikroElektronika GLCD Font Creator
+* REST API
 ### Approach
 The first step was to set up the AWS Device Shadows. In total, there are three shadows: BTC_Shadow, ETH_Shadow, and ADA_Shadow. Each shadow stores the 20 floating point values that correlate to the 20 most recent prices of each cryptocurrency. It was necessary for them to be self-updating. This was achieved via 3 respective lambda functions, each with an EventBridge trigger enabling them to run every minute. Each time a lambda function ran, it deleted the least recent price and added the newest price to the shadow. It was necessary to use boto3 to update the shadow. IAM permissions needed to be granted for a successful UpdateThingShadow(). In addition to the lambda functions, policies had to be attached to each Shadow, in order to allow the CC3200 Launchpad to call UpdateThingShadow() and GetThingShadow() with the REST API.
 Programming the launchpad had multiple parts: setting up the launchpad to readily receive and upload data via AWS, writing code to interpret the data received from AWS, writing functions for drawing on the OLED display, creating custom font characters for the numbers and certain letters, polling SW2 and SW3 for user input, and coming up with the ultimate process of the algorithm.
@@ -23,30 +23,29 @@ The function drawGraph() drew a the line-plot in a succession – starting from 
 MikroElektronika GLCD Font Creator was used to create the custom characters at 90 degrees. All digits from 0 – 9 were replaced as well as the characters A, B, C, D, E, and T.
 To access the dynamic data via AWS, http_get() was written to use a rest API call (GET) to get the full state of a shadow. This function parsed the returned string and loaded it into a global double array.
 ### Algorithm
-![GitHub Logo](/images/flow.PNG)
-![Flowchart for the algorithm at high-level](url)
+![Flow Image](/images/flow.PNG)
 The algorithm begins by initializing the board, configuring the pinmux settings, and setting the state of the device to BTC. SPI is enabled and the OLED display is initialized. The screen is filled with black and the edges of the graph are drawn. UART is configured for serial monitoring via a terminal. The device connects to WiFi, sets the time, and then connects to the AWS server.
 The device enters a while loop that checks the state and downloads the shadow data from AWS. The crypto symbol is drawn on the board, with the recent price. Followed by the line plot of the previous 20 minutes. The algorithm enters a second while loop that breaks after 60 seconds. Within this loop, SW2 and SW3 are polled for user input. If SW2 is pressed, the state changes and the main while loop advances. If SW3 is pressed, a message is posted to AWS, queuing an email, of the most recent price for the displayed cryptocurrency, to be sent to the user. The while loop repeats itself, self-updating every 60 seconds.
 ### Protocols and Libraries
-• Boto3 (Python): Used in each lambda function for directly reading and updating the shadow.
-• Json (Python): Used in each lambda function for formatting the payload to write to the shadow and reading the payload from the shadow.
-• Urllib (Python): Used in each lambda function for formatting data from the Crypto Compare API.
-• Stdio, Stdint, Stdlib (C): Used in microcontroller for various operations.
-• Time (C): Used for counting to 60 seconds before refreshing the OLED display.
-• SPI: Communication with OLED display.
-• UART: Monitoring Launchpad output via a terminal.
+* Boto3 (Python): Used in each lambda function for directly reading and updating the shadow.
+* Json (Python): Used in each lambda function for formatting the payload to write to the shadow and reading the payload from the shadow.
+* Urllib (Python): Used in each lambda function for formatting data from the Crypto Compare API.
+* Stdio, Stdint, Stdlib (C): Used in microcontroller for various operations.
+* Time (C): Used for counting to 60 seconds before refreshing the OLED display.
+* SPI: Communication with OLED display.
+* UART: Monitoring Launchpad output via a terminal.
 
 ## Results
 With the implementation of the algorithm and configuration of AWS, the IoT device runs successfully. However, there are ways in which the device could be improved.
 ### Areas for Improvement
-• The buttons could be implemented with interrupts rather than polling. Given the frequency at which the buttons are expected to be pressed, they would be more efficient as interrupts. This would remove the need for the Time library (C).
-• The device could automatically send the price via SMS or email after a massive price swing (~10% over 2 hours).
-• A smaller microcontroller could be used to decrease the size of the device. In addition, a larger display could be used, where multiple cryptocurrencies could be displayed at once.
+* The buttons could be implemented with interrupts rather than polling. Given the frequency at which the buttons are expected to be pressed, they would be more efficient as interrupts. This would remove the need for the Time library (C).
+* The device could automatically send the price via SMS or email after a massive price swing (~10% over 2 hours).
+* A smaller microcontroller could be used to decrease the size of the device. In addition, a larger display could be used, where multiple cryptocurrencies could be displayed at once.
 ### Potential Bugs
-• The price value is displayed from left to right in a fixed number of characters. When a price eventually increases its number significant digits, it will be rendered incorrectly.
-  o Solution: Count significant figures and align from right to left.
-• The displayed symbols are hardcoded into the controller program. If they ever changed, they would stay the same on the device, rendering incorrectly.
-  o Solution: Infrequently download the symbols via API. This will work as long as the API has its own keys for symbols.
+* The price value is displayed from left to right in a fixed number of characters. When a price eventually increases its number significant digits, it will be rendered incorrectly.
+  * Solution: Count significant figures and align from right to left.
+* The displayed symbols are hardcoded into the controller program. If they ever changed, they would stay the same on the device, rendering incorrectly.
+  * Solution: Infrequently download the symbols via API. This will work as long as the API has its own keys for symbols.
 
 ## Conclusion
 Ultimately, the device works as intended as an implementation of a CC3200 Launchpad, OLED display, and Amazon Web Services. It successfully, automatically updates every minute and responds properly to user input on the buttons. The buttons can switch the device between displaying Bitcoin, Ethereum, and Cardano data. The design, however, can certainly be improved with the implementation of interrupts instead of polling, automatic notifications, a smaller controller, a larger screen, and by increasing the adaptability to eliminate potential bugs.
