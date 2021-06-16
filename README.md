@@ -55,4 +55,5 @@ Ultimately, the device works as intended as an implementation of a CC3200 Launch
 
 ## References
 [1] R.Chloe Gregory, “Live Cryptocurrency Monitor using AWS Lambda,” Initial State.
+
 [2] A. Havens, "Beginners guide to creating a REST API, September 2021," Andrew Havens.
