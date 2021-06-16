@@ -24,7 +24,9 @@ MikroElektronika GLCD Font Creator was used to create the custom characters at 9
 To access the dynamic data via AWS, http_get() was written to use a rest API call (GET) to get the full state of a shadow. This function parsed the returned string and loaded it into a global double array.
 ### Algorithm
 ![Flow Image](/images/flow.PNG)
+
 *Figure 1: Flowchart for the algorithm at high-level*
+
 The algorithm begins by initializing the board, configuring the pinmux settings, and setting the state of the device to BTC. SPI is enabled and the OLED display is initialized. The screen is filled with black and the edges of the graph are drawn. UART is configured for serial monitoring via a terminal. The device connects to WiFi, sets the time, and then connects to the AWS server.
 The device enters a while loop that checks the state and downloads the shadow data from AWS. The crypto symbol is drawn on the board, with the recent price. Followed by the line plot of the previous 20 minutes. The algorithm enters a second while loop that breaks after 60 seconds. Within this loop, SW2 and SW3 are polled for user input. If SW2 is pressed, the state changes and the main while loop advances. If SW3 is pressed, a message is posted to AWS, queuing an email, of the most recent price for the displayed cryptocurrency, to be sent to the user. The while loop repeats itself, self-updating every 60 seconds.
 ### Protocols and Libraries
