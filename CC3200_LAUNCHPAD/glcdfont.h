@@ -3,6 +3,7 @@
 
 // Standard ASCII 5x7 font
 
+// Certain characters have been rotated 90 degrees: font[0...6] and characters for all integers.
 static const unsigned char font[] = {
                                      0x70, 0x40, 0x70, 0x40, 0x70,  //E
                                      0x70, 0x20, 0x20, 0x20, 0x20,  //T
