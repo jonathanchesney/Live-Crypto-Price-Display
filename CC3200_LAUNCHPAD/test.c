@@ -6,10 +6,6 @@
 *  test program.
 */
 
-// TODO Configure SPI port and use these libraries to implement
-// an OLED test program. See SPI example program.
-
-
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1351.h"
 
